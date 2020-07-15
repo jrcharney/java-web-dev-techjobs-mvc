@@ -1,0 +1,176 @@
+@startuml
+
+title Tech Jobs : MVC
+
+skinparam monochrome true
+
+package java.util {
+    interface "Comparator<E>" as Comparator {}
+}
+
+package org.launchcode.javawebdevtechjobsmvc {
+
+together upperClasses {
+class JavaWebDevTechjobsMvcApplication <<SpringBootApplication>> {
+    {static} +main(args : String[]) : void
+}
+
+'class NameSorter implements Comparator<Object>
+class NameSorter {
+    + compare(o1 : Object, o2 : Object) : int
+}
+Comparator  <|.. "Comparator<Object>" NameSorter
+}
+
+package controllers {
+    class HomeController <<Controller>> {
+        +@RequestMapping(value="") index(model : Model) : String
+        {method} \t actions = actionChoices
+        {method} \t return "index"
+    }
+    class ListController <<Controller>> <<@RequestMapping(value = list) >> {
+        {static} -columnChoices : Map<String,String> = new HashMap()
+        {static} -tableChoices  : Map<String,Object> = new HashMap()
+        __
+        +ListController()
+        ..
+        +@RequestMapping(value = "") list(model : Model) : String
+        {method} \t columns = columnChoices
+        {method} \t tableChoices = tableChoices
+        {method} \t employers = JobData.getAllEmployers()
+        {method} \t locations = JobData.getAllLocations()
+        {method} \t positions = JobData.getAllPositionTypes()
+        {method} \t skills = JobData.getAllCoreCompetency()
+        {method} \t return "list"
+        +@RequestMapping(value = "jobs") listJobsByColumnAndValue(model : Model, @RequestParam column : String, @RequestParam value : String)
+        {method} \t If column.toLowerCase().equals("all")
+        {method} \t\t title = "All Jobs"
+        {method} \t\t jobs = JobData.findAll()
+        {method} \t Else
+        {method} \t\t title = "Jobs with" + columnChoices.get(column) + ": " + value
+        {method} \t\t jobs = JobData.findByColumnAndValue(column,value)
+        {method} \t return "list-jobs"
+    }
+
+    class SearchController <<Controller>> <<@RequestMapping("search")>> {
+        +@RequestMapping(value = "") search(model : Model) : String
+        {method} \t column = ListController.columnChoices
+        {method} \t return "search"
+        +@RequestMapping(value = "results") displaySearchResults(model : Model, @RequestParam searchType : String, @RequestParam searchTerm : String)
+        {method} \t if(searchTerm != null || searchTerm.toLowerCase().equals("all")) {
+            {method} \t\t jobs = JobData.findByColumnAndValue(searchType, searchTerm);
+            {method} \t\t title = "Search for " + searchTerm + " in " + columnChoices.get(searchType)
+        {method} \t else {
+            {method} \t\t jobs = JobData.findAll();
+            {method} \t\t title = "All Jobs"
+        {method} \t type = searchType
+        {method} \t columns = columnChoices
+        {method} \t return "search"
+    }
+
+    HomeController .[hidden]. ListController
+    ListController .[hidden]. SearchController
+}
+
+package models {
+    abstract class JobField {
+        -id : int
+        {static} -nextId : int = 1
+        ..
+        -value : String
+        --
+        +JobField()
+        +JobField(value : String)
+        ..
+        +toString() : String
+        +equals(o : Object) : boolean
+        +hashCode() : int
+        .. Getters and Setters ..
+        +getId() : int
+        +getValue() : String
+        +setValue(value : String) : void
+    }
+
+    class Employer extends JobField {
+        +Employer(value : String)
+    }
+
+    class Location extends JobField {
+        +Location(value : String)
+    }
+
+    class PositionType extends JobField {
+        +PositionType(value : String)
+    }
+
+    class CoreCompetency extends JobField {
+        +CoreCompetency(value : String)
+    }
+
+    class Job {
+        -id : int
+        {static} -nextId : int = 1
+        ..
+        -name : String
+        -employer : Employer
+        -location : Location
+        -positionType : PositionType
+        -coreCompetency : CoreCompetency
+        __
+        +Job()
+        +Job(name : String, employer : Employer, location : Location, positionType : PositionType, coreCompetency : CoreCompetency)
+        ..
+        +toString() : String
+        +equals(o : Object) : boolean
+        +hashCode() : int
+        .. Getters and Setters ..
+        +getId() : int
+        +getName() : String
+        +setName(name : String) : void
+        +getEmployer() : Employer
+        +setEmployer(employer : Employer) : void
+        +getLocation() : Location
+        +setLocation(location : Location) : void
+        +getPositionType() : PositionType
+        +setPositionType(positionType : PositionType) : void
+        +getCoreCompetency() : CoreCompetency
+        +setCoreCompetency(coreCompetency : CoreCompetency) : void
+    }
+
+    class JobData <<static>> {
+        {static} {final} -DATA_FILE : String = "job_data.csv"
+        {static} -isDataLoaded : boolean = false
+        ..
+        {static} -allJobs : List<Job> = new ArrayList<>()
+        {static} -allEmployers : List<Employer> = new ArrayList<>()
+        {static} -allLocations : List<Location> = new ArrayList<>()
+        {static} -allPositionTypes : List<PositionType> = new ArrayList<>()
+        {static} -allCoreCompetency : List<CoreCompetency> = new ArrayList<>() /* Skills */
+        __
+        {static} +findAll() : ArrayList<Job>
+        {static} +findByColumnAndValue(column : String, value : String) : ArrayList<Job>
+        {static} +getFieldValue(job : Job, fieldName : String)
+        {static} +findByValue(value : String)
+        ..
+        {static} -findExistingObject(list : ArrayList, value : String) : Object
+        {static} -loadData() : void
+        .. Getters ..
+        {static} +getAllEmployers() : ArrayList<Employer>
+        {static} +getAllLocations() : ArrayList<Location>
+        {static} +getAllPositionTypes() : ArrayList<PositionType>
+        {static} +getAllCoreCompetency() : ArrayList<CoreCompetency>
+    }
+
+    Employer --* Job
+    Location --* Job
+    PositionType --* Job
+    CoreCompetency --* Job
+
+    Job --* JobData
+}
+
+upperClasses .[hidden]. models
+models .[hidden]. controllers
+}
+
+@enduml

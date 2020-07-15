@@ -1,0 +1,57 @@
+@startuml
+
+title Tech Jobs : MVC : Controllers
+
+skinparam monochrome true
+
+package controllers {
+    class HomeController <<Controller>> {
+        +@RequestMapping(value="") index(model : Model) : String
+        {method} \t actions = actionChoices
+        {method} \t return "index"
+    }
+    class ListController <<Controller>> <<@RequestMapping(value = list) >> {
+        {static} -columnChoices : Map<String,String> = new HashMap()
+        {static} -tableChoices  : Map<String,Object> = new HashMap()
+        __
+        +ListController()
+        ..
+        +@RequestMapping(value = "") list(model : Model) : String
+        {method} \t columns = columnChoices
+        {method} \t tableChoices = tableChoices
+        {method} \t employers = JobData.getAllEmployers()
+        {method} \t locations = JobData.getAllLocations()
+        {method} \t positions = JobData.getAllPositionTypes()
+        {method} \t skills = JobData.getAllCoreCompetency()
+        {method} \t return "list"
+        +@RequestMapping(value = "jobs") listJobsByColumnAndValue(model : Model, @RequestParam column : String, @RequestParam value : String)
+        {method} \t If column.toLowerCase().equals("all")
+        {method} \t\t title = "All Jobs"
+        {method} \t\t jobs = JobData.findAll()
+        {method} \t Else
+        {method} \t\t title = "Jobs with" + columnChoices.get(column) + ": " + value
+        {method} \t\t jobs = JobData.findByColumnAndValue(column,value)
+        {method} \t return "list-jobs"
+    }
+
+    class SearchController <<Controller>> <<@RequestMapping("search")>> {
+        +@RequestMapping(value = "") search(model : Model) : String
+        {method} \t column = ListController.columnChoices
+        {method} \t return "search"
+        +@RequestMapping(value = "results") displaySearchResults(model : Model, @RequestParam searchType : String, @RequestParam searchTerm : String)
+        {method} \t if(searchTerm != null || searchTerm.toLowerCase().equals("all")) {
+            {method} \t\t jobs = JobData.findByColumnAndValue(searchType, searchTerm);
+            {method} \t\t title = "Search for " + searchTerm + " in " + columnChoices.get(searchType)
+        {method} \t else {
+            {method} \t\t jobs = JobData.findAll();
+            {method} \t\t title = "All Jobs"
+        {method} \t type = searchType
+        {method} \t columns = columnChoices
+        {method} \t return "search"
+    }
+
+    HomeController .[hidden]. ListController
+    ListController .[hidden]. SearchController
+}
+
+@enduml

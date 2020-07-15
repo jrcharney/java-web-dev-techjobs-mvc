@@ -1,0 +1,46 @@
+@startuml
+
+title Tech Jobs : MVC : Summary
+
+skinparam monochrome true
+
+package java.util {
+    interface "Comparator<E>" as Comparator {}
+}
+
+package org.launchcode.javawebdevtechjobsmvc {
+
+together upperClasses {
+
+    'class NameSorter implements Comparator<Object>
+    class NameSorter {
+        + compare(o1 : Object, o2 : Object) : int
+    }
+
+    class JavaWebDevTechjobsMvcApplication <<SpringBootApplication>> {
+        {static} +main(args : String[]) : void
+    }
+
+    Comparator  <|.. "Comparator<Object>" NameSorter
+}
+
+together lowerClasses {
+
+    package models {
+        note as ModelNote
+        See models
+        endnote
+    }
+
+    package controllers {
+        note as ControllerNote
+        See controllers
+        endnote
+    }
+}
+
+upperClasses .[hidden]. lowerClasses
+
+}
+
+@enduml

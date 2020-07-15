@@ -1,0 +1,105 @@
+@startuml
+
+title Tech Jobs : MVC : Models
+
+skinparam monochrome true
+scale 0.75
+
+package models {
+    abstract class JobField {
+        -id : int
+        {static} -nextId : int = 1
+        ..
+        -value : String
+        --
+        +JobField()
+        +JobField(value : String)
+        ..
+        +toString() : String
+        +equals(o : Object) : boolean
+        +hashCode() : int
+        .. Getters and Setters ..
+        +getId() : int
+        +getValue() : String
+        +setValue(value : String) : void
+    }
+
+    class Employer extends JobField {
+        +Employer(value : String)
+    }
+
+    class Location extends JobField {
+        +Location(value : String)
+    }
+
+    class PositionType extends JobField {
+        +PositionType(value : String)
+    }
+
+    class CoreCompetency extends JobField {
+        +CoreCompetency(value : String)
+    }
+
+    class Job {
+        -id : int
+        {static} -nextId : int = 1
+        ..
+        -name : String
+        -employer : Employer
+        -location : Location
+        -positionType : PositionType
+        -coreCompetency : CoreCompetency
+        __
+        +Job()
+        +Job(name : String, employer : Employer, location : Location, positionType : PositionType, coreCompetency : CoreCompetency)
+        ..
+        +toString() : String
+        +equals(o : Object) : boolean
+        +hashCode() : int
+        .. Getters and Setters ..
+        +getId() : int
+        +getName() : String
+        +setName(name : String) : void
+        +getEmployer() : Employer
+        +setEmployer(employer : Employer) : void
+        +getLocation() : Location
+        +setLocation(location : Location) : void
+        +getPositionType() : PositionType
+        +setPositionType(positionType : PositionType) : void
+        +getCoreCompetency() : CoreCompetency
+        +setCoreCompetency(coreCompetency : CoreCompetency) : void
+    }
+
+    class JobData <<static>> {
+        {static} {final} -DATA_FILE : String = "job_data.csv"
+        {static} -isDataLoaded : boolean = false
+        ..
+        {static} -allJobs : List<Job> = new ArrayList<>()
+        {static} -allEmployers : List<Employer> = new ArrayList<>()
+        {static} -allLocations : List<Location> = new ArrayList<>()
+        {static} -allPositionTypes : List<PositionType> = new ArrayList<>()
+        {static} -allCoreCompetency : List<CoreCompetency> = new ArrayList<>() /* Skills */
+        __
+        {static} +findAll() : ArrayList<Job>
+        {static} +findByColumnAndValue(column : String, value : String) : ArrayList<Job>
+        {static} +getFieldValue(job : Job, fieldName : String)
+        {static} +findByValue(value : String)
+        ..
+        {static} -findExistingObject(list : ArrayList, value : String) : Object
+        {static} -loadData() : void
+        .. Getters ..
+        {static} +getAllEmployers() : ArrayList<Employer>
+        {static} +getAllLocations() : ArrayList<Location>
+        {static} +getAllPositionTypes() : ArrayList<PositionType>
+        {static} +getAllCoreCompetency() : ArrayList<CoreCompetency>
+    }
+
+    Employer --* Job
+    Location --* Job
+    PositionType --* Job
+    CoreCompetency --* Job
+
+    Job --* JobData
+}
+
+@enduml
